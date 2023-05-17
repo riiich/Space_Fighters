@@ -1,6 +1,6 @@
 # Space_Fighters
 
-This is an SFML game application that I created in Fall of 2020.
+This is an SFML game application developed in C++ that I created in Fall of 2020.
 
 Space Fighters is a bootleg version of the Space Invaders. 
 
