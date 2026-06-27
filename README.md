@@ -1,7 +1,7 @@
 # Space_Fighters
 
-This is an SFML game application developed in C++ that I created in Fall of 2020.
-
+This is an SFML game application developed in C++ that I created in Fall of 2020 for CS 8 (Data Structures & Algorithms).
+ 
 Space Fighters is a bootleg version of the Space Invaders. 
 
 When the player enters the game, their objective is to stay alive while simultaneously destroying the incoming enemy ships. 
