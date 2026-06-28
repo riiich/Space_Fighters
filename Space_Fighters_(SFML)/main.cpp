@@ -36,7 +36,7 @@ int main()
                 window.close();
             }
 
-            if(event.Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
             {
                 window.close();
             }

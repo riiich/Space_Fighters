@@ -3,6 +3,7 @@
 //
 
 #include "SplashState.h"
+#include "ResourcePath.h"
 
 namespace SplashStateNameSpace
 {
@@ -12,24 +13,24 @@ namespace SplashStateNameSpace
     void SplashState::initSplashState()
     {
         //title
-        if(!this->titleTexture.loadFromFile("..\\Space_Fighters/Sprites/spaceFightersTitle.png"))
+        if(!this->titleTexture.loadFromFile(ResourcePath::resolve("Sprites/spaceFightersTitle.png")))
             std::cout << "ERROR: SPACE FIGHTERS TITLE IMAGE FILE IS NOT FOUND!\n";
         this->titleSprite.setTexture(this->titleTexture);
         this->titleSprite.setScale(sf::Vector2f{1.5f, 1.2f});
         this->titleSprite.setPosition(400.f, 200.f);
 
         //background
-        this->backgroundTexture.loadFromFile("..\\Space_Fighters/Sprites/splashScreenBG.jpg");
+        this->backgroundTexture.loadFromFile(ResourcePath::resolve("Sprites/splashScreenBG.jpg"));
         this->backgroundSprite.setTexture(this->backgroundTexture);
 
         //enter to play sprite
-        this->enterTexture.loadFromFile("..\\Space_Fighters/Sprites/Enter.png");
+        this->enterTexture.loadFromFile(ResourcePath::resolve("Sprites/Enter.png"));
         this->enterSprite.setTexture(this->enterTexture);
         this->enterSprite.setScale(0.5f, 0.5f);
         this->enterSprite.setPosition(680.f, 450.f);
 
         //font and text
-        this->splashFont.loadFromFile("..\\Space_Fighters/Fonts/laser.ttf");
+        this->splashFont.loadFromFile(ResourcePath::resolve("Fonts/Laser.ttf"));
         this->splashText.setFont(this->splashFont);
         this->splashText.setCharacterSize(40.f);
         this->splashText.setFillColor(sf::Color(57, 255, 20, 255));

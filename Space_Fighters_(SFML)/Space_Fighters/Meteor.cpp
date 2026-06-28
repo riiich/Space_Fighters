@@ -3,6 +3,7 @@
 //
 
 #include "Meteor.h"
+#include "ResourcePath.h"
 
 namespace MeteorNamespace
 {
@@ -27,7 +28,7 @@ namespace MeteorNamespace
 
     void Meteor::initMeteorText()
     {
-        if(!this->meteorText.loadFromFile("..\\Space_Fighters/Sprites/meteor.png"))
+        if(!this->meteorText.loadFromFile(ResourcePath::resolve("Sprites/meteor.png")))
             std::cout << "ERROR: Meteor file is not found!\n";
     }
 

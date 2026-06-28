@@ -3,6 +3,7 @@
 //
 #include <iostream>
 #include "Enemy.h"
+#include "ResourcePath.h"
 
 namespace EnemyNamespace
 {
@@ -41,7 +42,7 @@ namespace EnemyNamespace
         this->damagedTime = this->maxDamagedTimer;
         this->maxShootCooldown = 60.f;
         this->shootCooldown = 0.f;
-        this->enemyBulletText.loadFromFile("..\\Space_Fighters/Sprites/purpleEnergyOrb.png");
+        this->enemyBulletText.loadFromFile(ResourcePath::resolve("Sprites/purpleEnergyOrb.png"));
     }
 
     void Enemy::initEnemySprite(sf::Texture* enemyTexture)

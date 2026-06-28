@@ -17,7 +17,7 @@ set(SOURCE_FILES main.cpp Space_Fighters/Player.h Space_Fighters/Player.cpp Spac
         Space_Fighters/Leaderboard.cpp Space_Fighters/Leaderboard.h Space_Fighters/MusicBackground.cpp
         Space_Fighters/MusicBackground.h Space_Fighters/asteroidRocks.cpp
         Space_Fighters/asteroidRocks.h Space_Fighters/StatsText.cpp Space_Fighters/StatsText.h Space_Fighters/Sound.h
-        Space_Fighters/Sound.cpp Space_Fighters/SplashState.cpp Space_Fighters/SplashState.h)
+        Space_Fighters/Sound.cpp Space_Fighters/SplashState.cpp Space_Fighters/SplashState.h Space_Fighters/ResourcePath.h)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_executable(${PROJECT_NAME} WIN32 ${SOURCE_FILES})
@@ -25,8 +25,8 @@ else ()
     add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 endif ()
 
-set(SFML_ROOT D:/SFML-2.5.1)
-set(SFML_STATIC_LIBRARIES TRUE)
+set(SFML_ROOT "D:/SFML-2.5.1" CACHE PATH "Path to an SFML 2.x installation")
+set(SFML_STATIC_LIBRARIES FALSE)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
 #set(SFML_DIR C:/SFML/SFML-2.5.1/lib/cmake/SFML)

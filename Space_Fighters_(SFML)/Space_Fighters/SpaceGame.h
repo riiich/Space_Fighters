@@ -102,6 +102,7 @@ class SpaceGame :public Game
         sf::Sprite GameOverSprite;
         int currPoint;
         int highestPoint;
+        bool highScoreSaved;
         sf::RectangleShape currHealthBar;   //moves to indicate losing health
         sf::RectangleShape maxHealthBar;    //stays full size for health
         sf::RectangleShape currExpBar;  //moves to indicate player is gaining exp

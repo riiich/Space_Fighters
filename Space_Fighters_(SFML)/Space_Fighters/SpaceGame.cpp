@@ -3,6 +3,7 @@
 //
 
 #include "SpaceGame.h"
+#include "ResourcePath.h"
 
 namespace SpaceGameNamespace
 {
@@ -27,6 +28,11 @@ namespace SpaceGameNamespace
 
     void SpaceGame::addEvents(sf::RenderWindow& window)
     {
+        if(!status)
+        {
+            return;
+        }
+
         if(!pause)  //continues the game as long as the game is not paused
         {
             if(this->player->getHealth() > 0)
@@ -34,16 +40,18 @@ namespace SpaceGameNamespace
                 this->update(window);
             }
         }
-        if(!status)
-        {
-            this->splash.draw(window);
-        }
     }
 
     void SpaceGame::addEvents(const sf::RenderWindow &window, sf::Event& event)
     {
-        //pause the game by pressing enter
-        if(event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Enter))
+        if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter && !this->status)
+        {
+            this->status = true;
+            this->pause = false;
+            this->music[mainMusic]->playMusic();
+        }
+        //pause the game by pressing enter after the splash screen
+        else if(event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Enter))
         {
             if(this->pause)
             {
@@ -55,20 +63,14 @@ namespace SpaceGameNamespace
                 this->pause = true;
                 this->music[mainMusic]->stopMusic();
             }
-            if(event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Enter))
-            {
-                this->status = false;
-            }
-            else
-            {
-                this->status = true;
-            }
         }
     }
 
     void SpaceGame::draw(sf::RenderTarget &window, sf::RenderStates states) const
     {
-        if(pause)
+        if(!status)
+            splash.draw(window);
+        else if(pause)
             splash.draw(window);
         else
         {
@@ -85,8 +87,11 @@ namespace SpaceGameNamespace
     SpaceGame::SpaceGame()
     {
         splash.initSplashState();
-        image_path = "..\\Space_Fighters/Sprites/game_logo.png";
+        image_path = ResourcePath::resolve("Sprites/game_logo.png");
         title = "Space Fighters";
+        this->pause = true;
+        this->status = false;
+        this->highScoreSaved = false;
         this->dtMultiplier = 62.5f;
     }
 
@@ -152,7 +157,7 @@ namespace SpaceGameNamespace
     void SpaceGame::initPlayer(sf::RenderWindow& window)
     {
         //loading the image into a texture
-        if(!this->playerText.loadFromFile("..\\Space_Fighters/Sprites/SpaceShip3.png"))
+        if(!this->playerText.loadFromFile(ResourcePath::resolve("Sprites/SpaceShip3.png")))
         {
             std::cout << "ERROR: Player spaceship file is not found.\n";
         }
@@ -167,13 +172,13 @@ namespace SpaceGameNamespace
     {
         int enemyIndex = PlayerNamespace::WEAPONS::type2Bullet + 1;
         this->textures.push_back(new sf::Texture());
-        this->textures[enemyIndex++]->loadFromFile("..\\Space_Fighters/Sprites/enemyShip1.png");   //enemy texture after the ammo textures
+        this->textures[enemyIndex++]->loadFromFile(ResourcePath::resolve("Sprites/enemyShip1.png"));   //enemy texture after the ammo textures
 
         this->textures.push_back(new sf::Texture());
-        this->textures[enemyIndex++]->loadFromFile("..\\Space_Fighters/Sprites/enemyShip2.png");
+        this->textures[enemyIndex++]->loadFromFile(ResourcePath::resolve("Sprites/enemyShip2.png"));
 
         this->textures.push_back(new sf::Texture());
-        this->textures[enemyIndex++]->loadFromFile("..\\Space_Fighters/Sprites/enemyShip3.png");
+        this->textures[enemyIndex++]->loadFromFile(ResourcePath::resolve("Sprites/enemyShip3.png"));
 
         this->enemySpawnTimeMax = 35.f;     //the speed of enemy spawn
         this->enemySpawnTime = this->enemySpawnTimeMax;
@@ -185,23 +190,23 @@ namespace SpaceGameNamespace
     void SpaceGame::initAmmo()
     {
         this->textures.push_back(new sf::Texture());
-        this->textures[PlayerNamespace::WEAPONS::defaultBullet]->loadFromFile("..\\Space_Fighters/Sprites/green_bullet.png");
+        this->textures[PlayerNamespace::WEAPONS::defaultBullet]->loadFromFile(ResourcePath::resolve("Sprites/green_bullet.png"));
 
         this->textures.push_back(new sf::Texture());
-        this->textures[PlayerNamespace::WEAPONS::type1Bullet]->loadFromFile("..\\Space_Fighters/Sprites/blueLaserBeam.png");
+        this->textures[PlayerNamespace::WEAPONS::type1Bullet]->loadFromFile(ResourcePath::resolve("Sprites/blueLaserBeam.png"));
 
         this->textures.push_back(new sf::Texture());
-        this->textures[PlayerNamespace::WEAPONS::type2Bullet]->loadFromFile("..\\Space_Fighters/Sprites/fireBullet.png");
+        this->textures[PlayerNamespace::WEAPONS::type2Bullet]->loadFromFile(ResourcePath::resolve("Sprites/fireBullet.png"));
     }
 
     //initializes the font, health, and game over screen
     void SpaceGame::initInterface(sf::RenderWindow& window)
     {
         //ARCADE FONT
-        if(!this->font.loadFromFile("..\\Space_Fighters/Fonts/Arcade.ttf"))
+        if(!this->font.loadFromFile(ResourcePath::resolve("Fonts/Arcade.ttf")))
             std::cout << "ERROR: Arcade font file is not found!\n";
 
-        if(!this->statsFont.loadFromFile("..\\Space_Fighters/Fonts/Laser.ttf"))
+        if(!this->statsFont.loadFromFile(ResourcePath::resolve("Fonts/Laser.ttf")))
             std::cout << "ERROR: Laser font file is not found!\n";
 
         //ENEMY HP TEXT
@@ -300,7 +305,7 @@ namespace SpaceGameNamespace
         this->splashScreenText.setPosition(window.getSize().x/3, 5.f);
 
         //GAME OVER
-        if(!this->GameOverText.loadFromFile("..\\Space_Fighters/Sprites/Game_Over.png"))
+        if(!this->GameOverText.loadFromFile(ResourcePath::resolve("Sprites/Game_Over.png")))
         {
             std::cout << "ERROR: Game Over file is not found.\n";
         }
@@ -312,7 +317,7 @@ namespace SpaceGameNamespace
     void SpaceGame::initSpace()
     {
         //loading the space image for the background
-        if(!this->spaceText.loadFromFile("..\\Space_Fighters/Sprites/spaceBackgroundImage.jpg"))
+        if(!this->spaceText.loadFromFile(ResourcePath::resolve("Sprites/spaceBackgroundImage.jpg")))
         {
             std::cout << "ERROR: Space background file is not found.\n";
         }
@@ -328,7 +333,7 @@ namespace SpaceGameNamespace
 
     void SpaceGame::initGun()
     {
-        if(!this->gunText.loadFromFile("..\\Space_Fighters/Sprites/gun.png"))
+        if(!this->gunText.loadFromFile(ResourcePath::resolve("Sprites/gun.png")))
         {
             std::cout << "ERROR: Gun file is not found!.\n";
         }
@@ -337,7 +342,7 @@ namespace SpaceGameNamespace
     void SpaceGame::initLogo(sf::RenderWindow& window)
     {
         //loading texture for the game logo
-        if(!this->gameLogoText.loadFromFile("..\\Space_Fighters/Sprites/spaceFightersTitle.png"))
+        if(!this->gameLogoText.loadFromFile(ResourcePath::resolve("Sprites/spaceFightersTitle.png")))
             std::cout << "ERROR: Game Logo file is not found.\n";
 
         this->gameLogoSprite.setTexture(this->gameLogoText);
@@ -350,20 +355,20 @@ namespace SpaceGameNamespace
 
     void SpaceGame::initMusicBackground()
     {
-        this->music.push_back(new MusicBackgroundNamespace::MusicBackground("..\\Space_Fighters/Music/introMusic.wav", 25.f));
-        this->music.push_back(new MusicBackgroundNamespace::MusicBackground("..\\Space_Fighters/Music/gameBackgroundMusic1.ogg", 25.f));
+        this->music.push_back(new MusicBackgroundNamespace::MusicBackground(ResourcePath::resolve("Music/introMusic.wav"), 25.f));
+        this->music.push_back(new MusicBackgroundNamespace::MusicBackground(ResourcePath::resolve("Music/gameBackgroundMusic1.ogg"), 25.f));
         this->music[mainMusic]->playMusic();    //play music
     }
 
     void SpaceGame::initSoundEffects()
     {
-        this->soundBuffShoot.loadFromFile("..\\Space_Fighters/Sounds/laserShootSound.wav");
+        this->soundBuffShoot.loadFromFile(ResourcePath::resolve("Sounds/laserShootSound.wav"));
         this->soundShoot.openSound(this->soundBuffShoot, 7.f);
 
-        this->soundBuffLvl.loadFromFile("..\\Space_Fighters/Sounds/lvlUp.wav");
+        this->soundBuffLvl.loadFromFile(ResourcePath::resolve("Sounds/lvlUp.wav"));
         this->soundLvl.openSound(this->soundBuffLvl, 20.f);
 
-        this->soundBuffOver.loadFromFile("..\\Space_Fighters/Sounds/gameOver.wav");
+        this->soundBuffOver.loadFromFile(ResourcePath::resolve("Sounds/gameOver.wav"));
         this->soundOver.openSound(this->soundBuffOver, 25.f);
     }
 
@@ -887,13 +892,18 @@ namespace SpaceGameNamespace
     {
         ////////HIGHEST SCORE////////
         //READ FROM FILE
-        std::ifstream inFile("..\\Space_Fighters/highScoreTracker.txt");
+        std::ifstream inFile(ResourcePath::resolve("highScoreTracker.txt"));
         this->scoreboard.loadFromFile(inFile);
+        this->highestPoint = this->scoreboard.getHighestScore();
     }
 
     void SpaceGame::scoreUpdate()
     {
-        this->highestPoint = this->scoreboard.getHighestScore();
+        if(this->currPoint > this->highestPoint)
+        {
+            this->highestPoint = this->currPoint;
+        }
+
         std::string highSSPoints;
         highSSPoints = "Highest Score: " + std::to_string(this->highestPoint);
         this->highPointCountText.setString(highSSPoints);
@@ -904,13 +914,13 @@ namespace SpaceGameNamespace
         this->pointCountText.setString(ssPoints.str()); //converts points(int) to string
 
         //WRITE TO FILE
-        std::ofstream outFile("..\\Space_Fighters/highScoreTracker.txt", std::ios::app);
+        std::ofstream outFile(ResourcePath::resolve("highScoreTracker.txt"), std::ios::app);
 
-        if(!this->player->isAlive())
+        if(!this->player->isAlive() && !this->highScoreSaved)
         {
             if(outFile.is_open())
             {
-                if(this->currPoint > this->highestPoint)    //compare current point to highest point
+                if(this->currPoint >= this->highestPoint && this->currPoint > this->scoreboard.getHighestScore())    //compare current point to highest point
                 {
                     this->highestPoint = this->currPoint;   //replaces the current point with the highest point
                     outFile << std::endl << this->highestPoint;     //write the score into the file
@@ -920,6 +930,7 @@ namespace SpaceGameNamespace
                     return;
                 }
             }
+            this->highScoreSaved = true;
         }
         outFile.close();
     }

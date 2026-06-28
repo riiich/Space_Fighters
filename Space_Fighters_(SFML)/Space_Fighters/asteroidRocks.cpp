@@ -3,6 +3,7 @@
 //
 
 #include "asteroidRocks.h"
+#include "ResourcePath.h"
 
 namespace asteroidRocksNameSpace
 {
@@ -34,7 +35,7 @@ namespace asteroidRocksNameSpace
 
     void asteroidRocks::initActualAsteroidText()
     {
-        if(!this->astText.loadFromFile("..\\Space_Fighters/Sprites/asteroid.png"))
+        if(!this->astText.loadFromFile(ResourcePath::resolve("Sprites/asteroid.png")))
         {
             std::cout << "ERROR: Asteroid file is not found!\n";
         }

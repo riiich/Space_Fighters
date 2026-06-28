@@ -20,9 +20,8 @@ namespace LeaderboardNamespace
             std::cout << "ERROR: High Score Tracker text file is not found!\n";
         }
 
-        while(!scoreFile.eof()) //read the scores until the end of the file
+        while(scoreFile >> score) //read valid scores until the end of the file
         {
-            scoreFile >> score;
             this->scores.push(score);   //put the score into heap
         }
         scoreFile.close();
@@ -36,6 +35,11 @@ namespace LeaderboardNamespace
 
     int Leaderboard::getHighestScore() const
     {
+        if(this->leaderboard.empty())
+        {
+            return 0;
+        }
+
         return this->leaderboard.front(); //returns the highest score in the queue
     }
 
