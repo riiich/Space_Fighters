@@ -17,7 +17,7 @@ int main()
     bool GAME_STARTED = true;
     bool SPLASHSCREEN = true;
 
-    sf::RenderWindow window(sf::VideoMode(1920,1080,32),"test");
+    sf::RenderWindow window(sf::VideoMode(1920,1080,32), "Space Fighters");
     window.setFramerateLimit(60);
 
     SpaceGameNamespace::SpaceGame game;

@@ -3,6 +3,7 @@
 //
 
 #include "Leaderboard.h"
+#include <sstream>
 
 namespace LeaderboardNamespace
 {
@@ -12,17 +13,20 @@ namespace LeaderboardNamespace
 
     void Leaderboard::loadFromFile(std::ifstream& scoreFile)
     {
-        //load the scores from the file into a heap
-        int score;
+        while(!this->leaderboard.empty())
+            this->leaderboard.pop();
 
+        //load the scores from the file into a heap
         if(!scoreFile)
         {
             std::cout << "ERROR: High Score Tracker text file is not found!\n";
+            return;
         }
 
-        while(scoreFile >> score) //read valid scores until the end of the file
+        const std::vector<LeaderboardEntry> entries = loadEntries(scoreFile);
+        for(const LeaderboardEntry& entry : entries)
         {
-            this->scores.push(score);   //put the score into heap
+            this->scores.push(entry.score);
         }
         scoreFile.close();
 
@@ -46,6 +50,37 @@ namespace LeaderboardNamespace
     Queue<int> Leaderboard::getQueueLeaderBoard() const
     {
         return this->leaderboard;
+    }
+
+    std::vector<LeaderboardEntry> Leaderboard::loadEntries(std::istream& scoreFile)
+    {
+        std::vector<LeaderboardEntry> entries;
+        std::string line;
+
+        while(std::getline(scoreFile, line))
+        {
+            std::stringstream row(line);
+            std::string firstValue;
+            if(!(row >> firstValue))
+                continue;
+
+            LeaderboardEntry entry;
+            std::stringstream legacyScore(firstValue);
+            if((legacyScore >> entry.score) && legacyScore.eof())
+            {
+                entry.username = "PLAYER";
+            }
+            else
+            {
+                entry.username = firstValue;
+                if(!(row >> entry.score))
+                    continue;
+            }
+
+            entries.push_back(entry);
+        }
+
+        return entries;
     }
 
 }

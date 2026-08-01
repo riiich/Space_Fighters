@@ -26,6 +26,8 @@ namespace ResourcePath
             "Space_Fighters/" + relativePath,
             "../Space_Fighters/" + relativePath,
             "../../Space_Fighters/" + relativePath,
+            "Space_Fighters_(SFML)/" + relativePath,
+            "../Space_Fighters_(SFML)/" + relativePath,
             "Space_Fighters_(SFML)/Space_Fighters/" + relativePath,
             "../Space_Fighters_(SFML)/Space_Fighters/" + relativePath
         };

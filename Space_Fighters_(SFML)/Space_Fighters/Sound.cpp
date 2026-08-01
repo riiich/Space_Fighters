@@ -38,4 +38,9 @@ namespace SoundNameSpace
     {
         this->sound.play();
     }
+
+    void Sound::setVolume(float vol)
+    {
+        this->sound.setVolume(vol);
+    }
 }

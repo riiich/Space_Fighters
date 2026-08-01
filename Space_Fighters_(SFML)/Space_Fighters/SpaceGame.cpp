@@ -3,6 +3,7 @@
 //
 
 #include "SpaceGame.h"
+#include "MenuSound.h"
 #include "ResourcePath.h"
 
 namespace SpaceGameNamespace
@@ -17,6 +18,7 @@ namespace SpaceGameNamespace
         this->initPoints();
         this->initSpace();
         this->initInterface(window);
+        this->initGameOverMenu(window);
         this->initAmmo();
         this->initEnemy();
         this->initGun();
@@ -42,16 +44,36 @@ namespace SpaceGameNamespace
         }
     }
 
-    void SpaceGame::addEvents(const sf::RenderWindow &window, sf::Event& event)
+    void SpaceGame::addEvents(sf::RenderWindow &window, sf::Event& event)
     {
-        if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter && !this->status)
+        if(!this->status)
         {
-            this->status = true;
-            this->pause = false;
-            this->music[mainMusic]->playMusic();
+            SplashStateNameSpace::SplashState::Action action = this->splash.inputHandling(window, event);
+            if(this->masterVolume != static_cast<float>(this->splash.getVolume()))
+            {
+                this->masterVolume = static_cast<float>(this->splash.getVolume());
+                this->applyAudioVolume();
+            }
+
+            if(action == SplashStateNameSpace::SplashState::Action::StartGame)
+            {
+                this->resetRound(window);
+                this->status = true;
+                this->pause = false;
+                this->roundStartTime = this->rawGameTime;
+                this->music[mainMusic]->playMusic();
+            }
+            else if(action == SplashStateNameSpace::SplashState::Action::ExitGame)
+            {
+                window.close();
+            }
         }
-        //pause the game by pressing enter after the splash screen
-        else if(event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Enter))
+        else if(this->player != nullptr && this->player->getHealth() <= 0)
+        {
+            this->handleGameOverEvent(window, event);
+        }
+        //pause the game by pressing P after the splash screen
+        else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P)
         {
             if(this->pause)
             {
@@ -70,12 +92,8 @@ namespace SpaceGameNamespace
     {
         if(!status)
             splash.draw(window);
-        else if(pause)
-            splash.draw(window);
         else
-        {
             Draw(window);
-        }
     }
 
     void SpaceGame::exit()
@@ -92,6 +110,11 @@ namespace SpaceGameNamespace
         this->pause = true;
         this->status = false;
         this->highScoreSaved = false;
+        this->gameOverSelectedIndex = 0;
+        this->gameOverSoundPlayed = false;
+        this->masterVolume = static_cast<float>(this->splash.getVolume());
+        this->rawGameTime = 0.f;
+        this->roundStartTime = 0.f;
         this->dtMultiplier = 62.5f;
     }
 
@@ -107,7 +130,8 @@ namespace SpaceGameNamespace
 
     void SpaceGame::setTime(const float& timer)
     {
-        this->gameTime = timer;
+        this->rawGameTime = timer;
+        this->gameTime = timer - this->roundStartTime;
     }
 
     //destructor
@@ -154,7 +178,7 @@ namespace SpaceGameNamespace
         std::cout << "DESTRUCTOR\n";
     }
 
-    void SpaceGame::initPlayer(sf::RenderWindow& window)
+    void SpaceGame::initPlayer(const sf::RenderWindow& window)
     {
         //loading the image into a texture
         if(!this->playerText.loadFromFile(ResourcePath::resolve("Sprites/SpaceShip3.png")))
@@ -266,9 +290,15 @@ namespace SpaceGameNamespace
 
         //PAUSE
         this->pauseText.setFont(this->font);
-        this->pauseText.setCharacterSize(35);
+        this->pauseText.setCharacterSize(45);
         this->pauseText.setFillColor(sf::Color::Yellow);
-        this->pauseText.setPosition(sf::Vector2f(window.getSize().x - 410, 0.f));
+        this->pauseText.setPosition(sf::Vector2f(window.getSize().x/2 - 115.f, window.getSize().y/2 - 60.f));
+
+        this->pauseHintText.setFont(this->font);
+        this->pauseHintText.setString("Press 'P' to pause/unpause");
+        this->pauseHintText.setCharacterSize(18);
+        this->pauseHintText.setFillColor(sf::Color(255, 255, 255, 210));
+        this->pauseHintText.setPosition(sf::Vector2f(window.getSize().x - 520.f, 6.f));
 
         //TIMER
         this->gameTimeText.setFont(this->statsFont);
@@ -314,6 +344,37 @@ namespace SpaceGameNamespace
                                          window.getSize().y/2 - this->GameOverSprite.getGlobalBounds().height/2);
     }
 
+    void SpaceGame::initGameOverMenu(sf::RenderWindow& window)
+    {
+        this->gameOverOverlay.setSize(sf::Vector2f(static_cast<float>(window.getSize().x),
+                                                   static_cast<float>(window.getSize().y)));
+        this->gameOverOverlay.setFillColor(sf::Color(0, 0, 0, 170));
+
+        this->finalScoreText.setFont(this->font);
+        this->finalScoreText.setCharacterSize(28);
+        this->finalScoreText.setFillColor(sf::Color::White);
+
+        const std::string labels[GAME_OVER_BUTTON_COUNT] = {"REPLAY", "MAIN MENU", "EXIT"};
+        for(int i = 0; i < GAME_OVER_BUTTON_COUNT; ++i)
+        {
+            this->gameOverButtons[i].setSize(sf::Vector2f(360.f, 72.f));
+            this->gameOverButtons[i].setPosition(window.getSize().x/2 - 180.f,
+                                                 window.getSize().y/2 + 115.f + static_cast<float>(i) * 86.f);
+            this->gameOverButtons[i].setOutlineThickness(3.f);
+
+            this->gameOverMenuText[i].setFont(this->font);
+            this->gameOverMenuText[i].setString(labels[i]);
+            this->gameOverMenuText[i].setCharacterSize(24);
+
+            sf::FloatRect bounds = this->gameOverMenuText[i].getLocalBounds();
+            this->gameOverMenuText[i].setPosition(this->gameOverButtons[i].getPosition().x +
+                                                  this->gameOverButtons[i].getSize().x / 2.f - bounds.width / 2.f,
+                                                  this->gameOverButtons[i].getPosition().y + 24.f);
+        }
+
+        this->updateGameOverMenuVisuals();
+    }
+
     void SpaceGame::initSpace()
     {
         //loading the space image for the background
@@ -355,21 +416,41 @@ namespace SpaceGameNamespace
 
     void SpaceGame::initMusicBackground()
     {
-        this->music.push_back(new MusicBackgroundNamespace::MusicBackground(ResourcePath::resolve("Music/introMusic.wav"), 25.f));
-        this->music.push_back(new MusicBackgroundNamespace::MusicBackground(ResourcePath::resolve("Music/gameBackgroundMusic1.ogg"), 25.f));
+        this->music.push_back(new MusicBackgroundNamespace::MusicBackground(ResourcePath::resolve("Music/introMusic.wav"), this->scaledVolume(25.f)));
+        this->music.push_back(new MusicBackgroundNamespace::MusicBackground(ResourcePath::resolve("Music/gameBackgroundMusic1.ogg"), this->scaledVolume(25.f)));
         this->music[mainMusic]->playMusic();    //play music
     }
 
     void SpaceGame::initSoundEffects()
     {
         this->soundBuffShoot.loadFromFile(ResourcePath::resolve("Sounds/laserShootSound.wav"));
-        this->soundShoot.openSound(this->soundBuffShoot, 7.f);
+        this->soundShoot.openSound(this->soundBuffShoot, this->scaledVolume(7.f));
 
         this->soundBuffLvl.loadFromFile(ResourcePath::resolve("Sounds/lvlUp.wav"));
-        this->soundLvl.openSound(this->soundBuffLvl, 20.f);
+        this->soundLvl.openSound(this->soundBuffLvl, this->scaledVolume(20.f));
 
         this->soundBuffOver.loadFromFile(ResourcePath::resolve("Sounds/gameOver.wav"));
-        this->soundOver.openSound(this->soundBuffOver, 25.f);
+        this->soundOver.openSound(this->soundBuffOver, this->scaledVolume(25.f));
+
+        this->menuSoundPath = ResourcePath::resolve("bulletSounds/pepSound1.mp3");
+        MenuSound::preload(this->menuSoundPath, static_cast<int>(this->masterVolume));
+    }
+
+    float SpaceGame::scaledVolume(float baseVolume) const
+    {
+        return baseVolume * (this->masterVolume / 100.f);
+    }
+
+    void SpaceGame::applyAudioVolume()
+    {
+        if(this->music.size() > intro)
+            this->music[intro]->setVolume(this->scaledVolume(25.f));
+        if(this->music.size() > mainMusic)
+            this->music[mainMusic]->setVolume(this->scaledVolume(25.f));
+
+        this->soundShoot.setVolume(this->scaledVolume(7.f));
+        this->soundLvl.setVolume(this->scaledVolume(20.f));
+        this->soundOver.setVolume(this->scaledVolume(25.f));
     }
 
     //updates player when keys are pressed
@@ -913,31 +994,174 @@ namespace SpaceGameNamespace
         ssPoints << "Points: " << this->currPoint;
         this->pointCountText.setString(ssPoints.str()); //converts points(int) to string
 
-        //WRITE TO FILE
-        std::ofstream outFile(ResourcePath::resolve("highScoreTracker.txt"), std::ios::app);
-
         if(!this->player->isAlive() && !this->highScoreSaved)
         {
+            std::ofstream outFile(ResourcePath::resolve("highScoreTracker.txt"), std::ios::app);
             if(outFile.is_open())
             {
-                if(this->currPoint >= this->highestPoint && this->currPoint > this->scoreboard.getHighestScore())    //compare current point to highest point
-                {
-                    this->highestPoint = this->currPoint;   //replaces the current point with the highest point
-                    outFile << std::endl << this->highestPoint;     //write the score into the file
-                }
-                else
-                {
-                    return;
-                }
+                outFile << std::endl << this->splash.getUsername() << ' ' << this->currPoint;
             }
             this->highScoreSaved = true;
         }
-        outFile.close();
     }
 
     void SpaceGame::pauseGame()
     {
-        this->pauseText.setString("PAUSE/UNPAUSE('ENTER')");
+        this->pauseText.setString("PAUSED");
+    }
+
+    void SpaceGame::handleGameOverEvent(sf::RenderWindow& window, sf::Event& event)
+    {
+        if(event.type == sf::Event::KeyPressed)
+        {
+            if(event.key.code == sf::Keyboard::Up)
+                this->updateGameOverSelection(-1);
+            else if(event.key.code == sf::Keyboard::Down)
+                this->updateGameOverSelection(1);
+            else if(event.key.code == sf::Keyboard::Enter)
+            {
+                int selectedOption = this->gameOverSelectedIndex;
+
+                if(selectedOption == 0)
+                {
+                    this->resetRound(window);
+                    this->status = true;
+                    this->pause = false;
+                    this->roundStartTime = this->rawGameTime;
+                    this->music[mainMusic]->playMusic();
+                }
+                else
+                {
+                    this->resetRound(window);
+                    this->status = false;
+                    this->pause = true;
+                    this->music[mainMusic]->stopMusic();
+                }
+                if(selectedOption == 2)
+                    window.close();
+            }
+        }
+        else if(event.type == sf::Event::MouseMoved)
+        {
+            sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+            for(int i = 0; i < GAME_OVER_BUTTON_COUNT; ++i)
+            {
+                if(this->gameOverButtons[i].getGlobalBounds().contains(mousePos))
+                {
+                    if(this->gameOverSelectedIndex != i)
+                    {
+                        this->gameOverSelectedIndex = i;
+                        this->updateGameOverMenuVisuals();
+                        this->playMenuSelectionSound();
+                    }
+                }
+            }
+        }
+        else if(event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+        {
+            sf::Vector2f mousePos = window.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+            for(int i = 0; i < GAME_OVER_BUTTON_COUNT; ++i)
+            {
+                if(this->gameOverButtons[i].getGlobalBounds().contains(mousePos))
+                {
+                    this->gameOverSelectedIndex = i;
+                    sf::Event enterEvent;
+                    enterEvent.type = sf::Event::KeyPressed;
+                    enterEvent.key.code = sf::Keyboard::Enter;
+                    this->handleGameOverEvent(window, enterEvent);
+                }
+            }
+        }
+    }
+
+    void SpaceGame::resetRound(const sf::RenderWindow& window)
+    {
+        this->clearRoundObjects();
+        this->initPlayer(window);
+
+        this->currPoint = 0;
+        this->enemySpawnTimeMax = 35.f;
+        this->enemySpawnTime = this->enemySpawnTimeMax;
+        this->enemiesKillCount = 0;
+        this->meteorKillCount = 0;
+        this->asteroidKillCount = 0;
+        this->highScoreSaved = false;
+        this->gameOverSoundPlayed = false;
+        this->gameOverSelectedIndex = 0;
+        this->pause = false;
+        this->roundStartTime = this->rawGameTime;
+        this->gameTime = 0.f;
+        this->enemyHPText.setString("");
+        this->currHealthBar = this->maxHealthBar;
+        this->currHealthBar.setFillColor(sf::Color::Red);
+        this->currExpBar.setScale(1.f, 1.f);
+
+        this->getScore();
+        this->scoreUpdate();
+        this->updateGameOverMenuVisuals();
+    }
+
+    void SpaceGame::clearRoundObjects()
+    {
+        if(this->player != nullptr)
+        {
+            delete this->player;
+            this->player = nullptr;
+        }
+
+        for(AmmoNamespace::Ammo* ammo : this->bullets)
+            delete ammo;
+        this->bullets.clear();
+
+        for(EnemyNamespace::Enemy* enemy : this->enemies)
+            delete enemy;
+        this->enemies.clear();
+
+        for(MeteorNamespace::Meteor* meteor : this->meteors)
+            delete meteor;
+        this->meteors.clear();
+
+        for(asteroidRocksNameSpace::asteroidRocks* asteroid : this->realAsteroids)
+            delete asteroid;
+        this->realAsteroids.clear();
+
+        this->stats.clear();
+    }
+
+    void SpaceGame::updateGameOverSelection(int direction)
+    {
+        this->gameOverSelectedIndex += direction;
+        if(this->gameOverSelectedIndex >= GAME_OVER_BUTTON_COUNT)
+            this->gameOverSelectedIndex = 0;
+        else if(this->gameOverSelectedIndex < 0)
+            this->gameOverSelectedIndex = GAME_OVER_BUTTON_COUNT - 1;
+
+        this->updateGameOverMenuVisuals();
+        this->playMenuSelectionSound();
+    }
+
+    void SpaceGame::updateGameOverMenuVisuals()
+    {
+        for(int i = 0; i < GAME_OVER_BUTTON_COUNT; ++i)
+        {
+            if(i == this->gameOverSelectedIndex)
+            {
+                this->gameOverButtons[i].setFillColor(sf::Color(120, 42, 54, 235));
+                this->gameOverButtons[i].setOutlineColor(sf::Color(255, 218, 120, 255));
+                this->gameOverMenuText[i].setFillColor(sf::Color(255, 250, 210, 255));
+            }
+            else
+            {
+                this->gameOverButtons[i].setFillColor(sf::Color(12, 18, 35, 225));
+                this->gameOverButtons[i].setOutlineColor(sf::Color(130, 145, 170, 255));
+                this->gameOverMenuText[i].setFillColor(sf::Color::White);
+            }
+        }
+    }
+
+    void SpaceGame::playMenuSelectionSound()
+    {
+        MenuSound::play(this->menuSoundPath, static_cast<int>(this->masterVolume));
     }
 
     void SpaceGame::checkBoundaries(const sf::RenderWindow& window)
@@ -974,10 +1198,11 @@ namespace SpaceGameNamespace
         this->interfaceUpdate();
         this->scoreUpdate();
 
-        if(this->player->getHealth() <= 0)
+        if(this->player->getHealth() <= 0 && !this->gameOverSoundPlayed)
         {
             this->music[mainMusic]->stopMusic();
             this->soundOver.play();
+            this->gameOverSoundPlayed = true;
         }
 
         std::cout << "LEVEL: " << this->player->getLvl() << std::endl;
@@ -1000,7 +1225,9 @@ namespace SpaceGameNamespace
         window.draw(this->expText);
         window.draw(this->exp);
         window.draw(this->lvlText);
-        window.draw(this->pauseText);
+        window.draw(this->pauseHintText);
+        if(this->pause)
+            window.draw(this->pauseText);
         window.draw(this->enemyHPText);
         window.draw(this->gameTimeText);
         window.draw(this->killCountBackground);
@@ -1017,7 +1244,25 @@ namespace SpaceGameNamespace
 
         if(this->player->getHealth() <= 0)  //game over screen appears when health is diminished
         {
-            window.draw(this->GameOverSprite);
+            this->drawGameOverMenu(window);
+        }
+    }
+
+    void SpaceGame::drawGameOverMenu(sf::RenderTarget& window) const
+    {
+        window.draw(this->gameOverOverlay);
+        window.draw(this->GameOverSprite);
+
+        sf::Text scoreText = this->finalScoreText;
+        scoreText.setString("FINAL SCORE: " + std::to_string(this->currPoint));
+        sf::FloatRect scoreBounds = scoreText.getLocalBounds();
+        scoreText.setPosition(960.f - scoreBounds.width / 2.f, 620.f);
+        window.draw(scoreText);
+
+        for(int i = 0; i < GAME_OVER_BUTTON_COUNT; ++i)
+        {
+            window.draw(this->gameOverButtons[i]);
+            window.draw(this->gameOverMenuText[i]);
         }
     }
 

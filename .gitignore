@@ -3,6 +3,7 @@
 /Space_Fighters_(SFML)/build/
 /Space_Fighters_(SFML)/SpaceFighters.exe
 /Space_Fighters_(SFML)/*.dll
+/Space_Fighters_(SFML)/Space_Fighters/playerProfile.txt
 
 .codex
 .agents

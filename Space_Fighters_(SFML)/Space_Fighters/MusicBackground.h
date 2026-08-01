@@ -16,6 +16,7 @@ namespace MusicBackgroundNamespace
         void playMusic();   //play the music
         bool statusOfGame();    //keeps looping as long as the
         void stopMusic();    //set to true or false depending on whether the game is over or not
+        void setVolume(float vol);
 
     private:
         sf::Music spaceMusic;

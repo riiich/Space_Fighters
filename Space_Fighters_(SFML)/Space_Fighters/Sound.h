@@ -17,6 +17,7 @@ namespace SoundNameSpace
         bool getStatus() const;
         void setStatus(const bool& status);
         void play();
+        void setVolume(float vol);
 
     private:
         sf::SoundBuffer soundBuff;

@@ -36,6 +36,7 @@ class SpaceGame :public Game
         void update(const sf::RenderWindow& window);  //updates the events of the game
         void Draw(sf::RenderTarget& window) const;    //draws the sprites on the screen
         void drawInterface(sf::RenderTarget& window) const;    //draw the text onto the screen
+        void drawGameOverMenu(sf::RenderTarget& window) const;
 
         void Setdt(const float& dt);
         float Getdt() const;
@@ -45,7 +46,7 @@ class SpaceGame :public Game
         /////////DAVESTATION/////////////
         void start(sf::RenderWindow& window);
         void addEvents(sf::RenderWindow &window);
-        void addEvents(const sf::RenderWindow &window, sf::Event& event);
+        void addEvents(sf::RenderWindow &window, sf::Event& event);
         void draw(sf::RenderTarget &window, sf::RenderStates states) const;
         void exit();
         ////////////////////////////////
@@ -55,7 +56,7 @@ class SpaceGame :public Game
         //PLAYER STUFF
         PlayerNamespace::Player* player;
         sf::Texture playerText;
-        void initPlayer(sf::RenderWindow& window);  //initializes a new player
+        void initPlayer(const sf::RenderWindow& window);  //initializes a new player
 
         //bullets are in the first few of the vector, the enemies are after the bullet textures
         std::vector<sf::Texture*> textures;    //vector that holds textures (bullets, enemies,...)
@@ -80,6 +81,13 @@ class SpaceGame :public Game
 
         //UI STUFF
         void initInterface(sf::RenderWindow& window); //initializes the text for the point counter
+        void initGameOverMenu(sf::RenderWindow& window);
+        void handleGameOverEvent(sf::RenderWindow& window, sf::Event& event);
+        void resetRound(const sf::RenderWindow& window);
+        void clearRoundObjects();
+        void updateGameOverSelection(int direction);
+        void updateGameOverMenuVisuals();
+        void playMenuSelectionSound();
         void initSpace();   //initializes the space background
         void initPoints();  //initializes the points for the player
         void initLogo(sf::RenderWindow& window);
@@ -96,10 +104,18 @@ class SpaceGame :public Game
         sf::Text exp;   //indicating this is the exp bar
         sf::Text lvlText;
         sf::Text pauseText;
+        sf::Text pauseHintText;
         sf::Texture spaceText;
         sf::Sprite spaceSprite;
         sf::Texture GameOverText;
         sf::Sprite GameOverSprite;
+        sf::RectangleShape gameOverOverlay;
+        static const int GAME_OVER_BUTTON_COUNT = 3;
+        sf::RectangleShape gameOverButtons[GAME_OVER_BUTTON_COUNT];
+        sf::Text gameOverMenuText[GAME_OVER_BUTTON_COUNT];
+        sf::Text finalScoreText;
+        int gameOverSelectedIndex;
+        bool gameOverSoundPlayed;
         int currPoint;
         int highestPoint;
         bool highScoreSaved;
@@ -121,6 +137,9 @@ class SpaceGame :public Game
         //music (intro, background)
         std::vector<MusicBackgroundNamespace::MusicBackground*> music;   //vector that holds different music
         void initMusicBackground(); //background space game music
+        void applyAudioVolume();
+        float scaledVolume(float baseVolume) const;
+        float masterVolume;
         int typeMusic;
 
         //sound effects (shooting, leveling up,...)
@@ -130,10 +149,13 @@ class SpaceGame :public Game
         SoundNameSpace::Sound soundLvl;
         sf::SoundBuffer soundBuffOver;
         SoundNameSpace::Sound soundOver;
+        std::string menuSoundPath;
         void initSoundEffects();
 
         float gameTime;
         sf::Text gameTimeText;
+        float rawGameTime;
+        float roundStartTime;
 
         //kill count (enemies, asteroids, meteors)
         sf::RectangleShape killCountBackground;

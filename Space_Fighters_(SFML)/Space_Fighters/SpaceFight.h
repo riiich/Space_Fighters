@@ -12,7 +12,7 @@ public:
     SpaceFight();
     virtual void start(sf::RenderWindow& window);
     virtual void addEvents(sf::RenderWindow &window);
-    virtual void addEvents(const sf::RenderWindow &window, sf::Event& event);
+    virtual void addEvents(sf::RenderWindow &window, sf::Event& event);
     virtual void draw(sf::RenderTarget &window, sf::RenderStates states) const;
     virtual void exit();
 

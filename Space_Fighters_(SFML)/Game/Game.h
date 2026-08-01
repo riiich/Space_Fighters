@@ -34,7 +34,7 @@ public:
     std::string getImagePath();
     virtual void start(sf::RenderWindow& window) = 0;
     virtual void addEvents(sf::RenderWindow &window) = 0;
-    virtual void addEvents(const sf::RenderWindow &window, sf::Event& event) = 0;
+    virtual void addEvents(sf::RenderWindow &window, sf::Event& event) = 0;
     virtual void draw(sf::RenderTarget &window, sf::RenderStates states) const = 0;
     virtual void exit() = 0;
     GameText getInfo(sf::RenderWindow &window);

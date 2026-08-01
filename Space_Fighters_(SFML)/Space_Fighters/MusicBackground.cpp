@@ -35,4 +35,9 @@ namespace MusicBackgroundNamespace
     {
         this->spaceMusic.stop();
     }
+
+    void MusicBackground::setVolume(float vol)
+    {
+        this->spaceMusic.setVolume(vol);
+    }
 }

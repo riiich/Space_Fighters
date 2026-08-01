@@ -7,15 +7,24 @@
 #include "../DataStructures/Heap.h"
 #include "../DataStructures/Queue.h"
 #include <fstream>
+#include <string>
+#include <vector>
 
 namespace LeaderboardNamespace
 {
+    struct LeaderboardEntry
+    {
+        std::string username;
+        int score;
+    };
+
     class Leaderboard {
     public:
         Leaderboard();
         void loadFromFile(std::ifstream& scoreFile);    //load all the scores from the text file into a heap and push into a queue
         int getHighestScore() const;    //get the front score in the queue (at this point, it should be the highest score)
         Queue<int> getQueueLeaderBoard() const;
+        static std::vector<LeaderboardEntry> loadEntries(std::istream& scoreFile);
 
     private:
         Heap<int> scores;    //heap will keep popping the highest score at the top

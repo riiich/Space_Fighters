@@ -38,6 +38,7 @@
                 "-lsfml-window",
                 "-lsfml-audio",
                 "-lsfml-system",
+                "-lwinmm",
                 "-o",
                 "SpaceFighters.exe"
             ],

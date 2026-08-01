@@ -20,7 +20,7 @@ void SpaceFight::addEvents(sf::RenderWindow &window)
 
 }
 
-void SpaceFight::addEvents(const sf::RenderWindow &window, sf::Event& event)
+void SpaceFight::addEvents(sf::RenderWindow &window, sf::Event& event)
 {
 
 }
