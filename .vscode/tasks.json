@@ -2,93 +2,42 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Compile Space Fighters",
-            "type": "cppbuild",
-            "command": "C:\\MinGW\\bin\\g++.exe",
-            "args": [
-                "-std=c++14",
-                "-g",
-                "-ID:\\SFML-2.5.1\\include",
-                "main.cpp",
-                "Space_Fighters\\Player.cpp",
-                "Space_Fighters\\Enemy.cpp",
-                "Space_Fighters\\Ammo.cpp",
-                "Space_Fighters\\SpaceFight.cpp",
-                "Game\\Game.cpp",
-                "Game\\Thumbnail.cpp",
-                "Game\\GameText.cpp",
-                "Space_Fighters\\SpaceGame.cpp",
-                "Space_Fighters\\Meteor.cpp",
-                "DataStructures\\BinarySearchTree.cpp",
-                "DataStructures\\Heap.cpp",
-                "DataStructures\\LinkedList.cpp",
-                "DataStructures\\Node.cpp",
-                "DataStructures\\Node_Iterator.cpp",
-                "DataStructures\\Queue.cpp",
-                "DataStructures\\Stack.cpp",
-                "DataStructures\\TreeNode.cpp",
-                "Space_Fighters\\Leaderboard.cpp",
-                "Space_Fighters\\MusicBackground.cpp",
-                "Space_Fighters\\asteroidRocks.cpp",
-                "Space_Fighters\\StatsText.cpp",
-                "Space_Fighters\\Sound.cpp",
-                "Space_Fighters\\SplashState.cpp",
-                "-LD:\\SFML-2.5.1\\lib",
-                "-lsfml-graphics",
-                "-lsfml-window",
-                "-lsfml-audio",
-                "-lsfml-system",
-                "-lwinmm",
-                "-o",
-                "SpaceFighters.exe"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}\\Space_Fighters_(SFML)"
-            },
-            "problemMatcher": "$gcc",
-            "detail": "Compiles the full Space Fighters SFML project with C:\\MinGW\\bin\\g++.exe."
-        },
-        {
-            "label": "Copy Runtime DLLs",
+            "label": "Configure Space Fighters",
             "type": "process",
-            "command": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command": "cmake",
             "args": [
-                "-NoProfile",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-Command",
-                "Copy-Item -Force 'D:\\SFML-2.5.1\\bin\\openal32.dll','D:\\SFML-2.5.1\\bin\\sfml-audio-2.dll','D:\\SFML-2.5.1\\bin\\sfml-graphics-2.dll','D:\\SFML-2.5.1\\bin\\sfml-system-2.dll','D:\\SFML-2.5.1\\bin\\sfml-window-2.dll','C:\\MinGW\\bin\\libgcc_s_dw2-1.dll','C:\\MinGW\\bin\\libstdc++-6.dll' '${workspaceFolder}\\Space_Fighters_(SFML)'"
+                "-S",
+                "${workspaceFolder}\\Space_Fighters_(SFML)",
+                "-B",
+                "${workspaceFolder}\\Space_Fighters_(SFML)\\build",
+                "-DCMAKE_BUILD_TYPE=Debug"
             ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
             "problemMatcher": []
         },
         {
             "label": "Build Space Fighters",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "Compile Space Fighters",
-                "Copy Runtime DLLs"
+            "type": "process",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}\\Space_Fighters_(SFML)\\build",
+                "--config",
+                "Debug"
             ],
+            "dependsOrder": "sequence",
+            "dependsOn": "Configure Space Fighters",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": []
+            "problemMatcher": "$gcc"
         },
         {
             "label": "Run Space Fighters",
             "type": "process",
-            "command": "C:\\Windows\\System32\\cmd.exe",
-            "args": [
-                "/d",
-                "/c",
-                "call",
-                "${workspaceFolder}\\Run Space Fighters.bat"
-            ],
+            "command": "${workspaceFolder}\\Space_Fighters_(SFML)\\build\\bin\\SpaceFighters.exe",
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${workspaceFolder}\\Space_Fighters_(SFML)"
             },
             "problemMatcher": []
         },

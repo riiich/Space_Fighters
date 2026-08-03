@@ -4,6 +4,7 @@
 /Space_Fighters_(SFML)/SpaceFighters.exe
 /Space_Fighters_(SFML)/*.dll
 /Space_Fighters_(SFML)/Space_Fighters/playerProfile.txt
+/Space_Fighters_(SFML)/Space_Fighters/highScoreTracker.txt
 
 .codex
 .agents

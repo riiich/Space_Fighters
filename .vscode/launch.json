@@ -1,23 +1,28 @@
 {
     "version": "0.2.0",
     "configurations": [
-        
         {
-            "name": "Debug Space Fighters",
+            "name": "Debug Space Fighters (Visual Studio)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\Space_Fighters_(SFML)\\build\\bin\\SpaceFighters.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}\\Space_Fighters_(SFML)",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Debug Space Fighters (GDB)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}\\Space_Fighters_(SFML)\\SpaceFighters.exe",
+            "program": "${workspaceFolder}\\Space_Fighters_(SFML)\\build\\bin\\SpaceFighters.exe",
             "args": [],
-            "stopAtEntry": false,
             "cwd": "${workspaceFolder}\\Space_Fighters_(SFML)",
-            "environment": [],
-            "externalConsole": true,
-            "avoidWindowsConsoleRedirection": true,
+            "stopAtEntry": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "C:\\MinGW\\bin\\gdb.exe",
+            "miDebuggerPath": "gdb",
             "setupCommands": [
                 {
-                    "description": "Enable pretty-printing for gdb",
+                    "description": "Enable GDB pretty-printing",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
